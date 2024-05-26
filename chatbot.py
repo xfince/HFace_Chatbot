@@ -1,15 +1,11 @@
 import os
-from dotenv import load_dotenv
 import streamlit as st
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
-# Load environment variables from .env file
-load_dotenv()
+# Access the Hugging Face API key from Streamlit secrets
+HUGGINGFACE_API_KEY = st.secrets["HUGGINGFACE_API_KEY"]
 
-# Get the Hugging Face API key from the environment variable
-HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
-
-# Define model names mapping if needed
+# Define model names mapping
 MODEL_NAMES = {
     "llama-2-7b": "your-huggingface-model-name-for-llama-2-7b",
     "llama-2-13b": "your-huggingface-model-name-for-llama-2-13b",
@@ -20,12 +16,11 @@ MODEL_NAMES = {
 def call_llama_model(prompt, model_name):
     try:
         model_name_hf = MODEL_NAMES[model_name]
-        api_key = HUGGINGFACE_API_KEY
 
-        tokenizer = AutoTokenizer.from_pretrained(model_name_hf, use_auth_token=api_key)
-        model = AutoModelForCausalLM.from_pretrained(model_name_hf, use_auth_token=api_key)
+        tokenizer = AutoTokenizer.from_pretrained(model_name_hf, use_auth_token=HUGGINGFACE_API_KEY)
+        model = AutoModelForCausalLM.from_pretrained(model_name_hf, use_auth_token=HUGGINGFACE_API_KEY)
 
-        generator = pipeline("text-generation", model=model, tokenizer=tokenizer, use_auth_token=api_key)
+        generator = pipeline("text-generation", model=model, tokenizer=tokenizer, use_auth_token=HUGGINGFACE_API_KEY)
         response = generator(prompt, max_length=100, num_return_sequences=1)[0]["generated_text"]
 
         return response
